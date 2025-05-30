@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Iniciar Sesión - Urban Shop</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+  <header>
+  <!-- Barra de navegación -->
+  <nav class="bg-gradient-to-r from-black via-blue-700 to-black text-white p-4 fixed w-full z-10 shadow-lg">
+    <div class="container mx-auto flex justify-between items-center">
+      <a href="#" class="text-2xl font-bold">Urban Shop</a>
+      <div class="space-x-4">
+        <a href="inicio.html" class="hover:text-blue-300">Inicio</a>
+        <a href="#" class="hover:text-blue-300">Productos</a>
+        <a href="#" class="hover:text-blue-300">Carrito</a>
+        <a href="index.html" class="hover:text-blue-300">Iniciar Sesión</a>
+      </div>
+    </div>
+  </nav>
+</header>
+  <!-- Contenido principal -->
+  <main class="flex-grow flex items-center justify-center p-6">
+    <div class="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
+      <h2 class="text-2xl font-semibold text-center mb-6 text-gray-800">Iniciar Sesión</h2>
+      <form action="#" method="POST" class="space-y-4">
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700">Correo electrónico</label>
+          <input type="email" id="email" name="email" required class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
+          <input type="password" id="password" name="password" required class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-200">Ingresar</button>
+        <div class="text-center mt-4">
+          <a href="#" class="text-blue-600 hover:underline text-sm">¿Olvidaste tu contraseña?</a>
+        </div>
+        <div class="text-center mt-2">
+          <a href="#" class="text-blue-600 hover:underline text-sm">¿No tienes cuenta? Regístrate</a>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <!-- Pie de página (opcional) -->
+  <footer class="bg-gray-200 text-center text-gray-600 p-4">
+    &copy; 2025 Urban Shop. Todos los derechos reservados.
+  </footer>
+
+</body>
+</html>
