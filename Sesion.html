@@ -8,25 +8,52 @@
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">
   <header>
-    
-<!-- Barra de navegacion -->
-  <nav class="bg-black text-white p-4 fixed w-full z-10 shadow-lg">
-    <div class="container mx-auto flex justify-between items-center">
-      <a href="inicio.html" class="text-2xl font-bold">Urban Shop</a>
-      <div class="space-x-4">
-        <a href="inicio.html" class="hover:text-blue-300">Inicio</a>
-        <a href="#" class="hover:text-blue-300">Productos</a>
-        <a href="Sesion.html" class="hover:text-blue-300">Iniciar Sesión</a>
-        <a href="registro.html" class="hover:text-blue-300 font-semibold underline">Registrarse</a>
-        <a href="#" class="hover:text-blue-300">Carrito</a>
-      </div>
-    </div>
-  </nav>
-</header>
-<!-- Fin barra de navegacion -->
+    <!-- Barra de navegación -->
+    <nav class="bg-black text-white p-4 fixed w-full z-10 shadow-lg">
+      <div class="container mx-auto flex justify-between items-center">
+        <a href="inicio.html" class="text-2xl font-bold">Urban Shop</a>
+        <!-- Botón hamburguesa -->
+        <button id="menu-toggle" class="md:hidden text-white focus:outline-none">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
 
-<!-- Login -->
-  <main class="flex-grow flex items-center justify-center p-6">
+        <!-- Menú grande -->
+        <div id="menu" class="hidden md:flex space-x-4">
+          <a href="inicio.html" class="hover:text-blue-300">Inicio</a>
+          <a href="#" class="hover:text-blue-300">Productos</a>
+          <a href="Sesion.html" class="hover:text-blue-300">Iniciar Sesión</a>
+          <a href="registro.html" class="hover:text-blue-300 font-semibold underline">Registrarse</a>
+          <a href="#" class="hover:text-blue-300">Carrito</a>
+        </div>
+      </div>
+
+      <!-- Menú móvil -->
+      <div id="mobile-menu" class="md:hidden hidden flex-col mt-2 space-y-2 px-4">
+        <a href="inicio.html" class="block hover:text-blue-300">Inicio</a>
+        <a href="#" class="block hover:text-blue-300">Productos</a>
+        <a href="Sesion.html" class="block hover:text-blue-300">Iniciar Sesión</a>
+        <a href="registro.html" class="block hover:text-blue-300 font-semibold underline">Registrarse</a>
+        <a href="#" class="block hover:text-blue-300">Carrito</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Script hamburguesa -->
+  <script>
+    const toggle = document.getElementById("menu-toggle");
+    const mobileMenu = document.getElementById("mobile-menu");
+
+    toggle.addEventListener("click", () => {
+      mobileMenu.classList.toggle("hidden");
+    });
+  </script>
+
+  <!-- Login -->
+  <main class="flex-grow flex items-center justify-center p-6 mt-24">
     <div class="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
       <h2 class="text-2xl font-semibold text-center mb-6 text-gray-800">Iniciar Sesión</h2>
       <form action="#" method="POST" class="space-y-4">
@@ -48,12 +75,11 @@
       </form>
     </div>
   </main>
-<!-- Fin login -->
+  <!-- Fin login -->
 
-<!-- pie de pagina -->
-  <footer class="bg-black text-center text-white p-4">
+  <!-- Pie de página -->
+  <footer class="bg-black text-center text-white p-4 mt-6">
     &copy; 2025 Urban Shop. Todos los derechos reservados.
   </footer>
-<!-- Fin de pie de pagina -->
 </body>
 </html>

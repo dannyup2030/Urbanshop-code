@@ -12,55 +12,56 @@
 <body class="bg-gray-100 min-h-screen flex flex-col">
 
   <!-- Barra de navegación -->
-  <!-- Barra de navegación responsive -->
-<nav class="bg-black text-white p-4 fixed w-full z-10 shadow-lg">
-  <div class="container mx-auto flex justify-between items-center">
-    <a href="inicio.html" class="text-2xl font-bold">Urban Shop</a>
 
-    <!-- Botón hamburguesa (solo visible en pantallas pequeñas) -->
-<button id="toggle-menu" class="md:hidden text-white focus:outline-none">
-  <!-- Icono hamburguesa -->
-  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-      d="M4 6h16M4 12h16M4 18h16"></path>
-  </svg>
-</button>
+  <nav class="bg-black text-white p-4 fixed w-full z-10 shadow-lg">
+    <div class="container mx-auto flex justify-between items-center">
+      <a href="inicio.html" class="text-2xl font-bold">Urban Shop</a>
+
+      <!-- Botón hamburguesa (solo visible en pantallas pequeñas) -->
+      <button id="toggle-menu" class="md:hidden text-white focus:outline-none">
+        <!-- Icono hamburguesa -->
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
 
 
-    <!-- Menú de escritorio -->
-    <div id="nav-links" class="hidden md:flex space-x-4">
-      <a href="inicio.html" class="hover:text-blue-300">Inicio</a>
-      <a href="#" class="hover:text-blue-300">Productos</a>
-      <a href="Sesion.html" class="hover:text-blue-300">Iniciar Sesión</a>
-      <a href="registro.html" class="hover:text-blue-300 font-semibold underline">Registrarse</a>
-      <a href="#" class="hover:text-blue-300">Carrito</a>
+      <!-- Menú de escritorio -->
+      <div id="nav-links" class="hidden md:flex space-x-4">
+        <a href="inicio.html" class="hover:text-blue-300">Inicio</a>
+        <a href="#" class="hover:text-blue-300">Productos</a>
+        <a href="Sesion.html" class="hover:text-blue-300">Iniciar Sesión</a>
+        <a href="registro.html" class="hover:text-blue-300 font-semibold underline">Registrarse</a>
+        <a href="#" class="hover:text-blue-300">Carrito</a>
+      </div>
     </div>
-  </div>
 
 
-<!-- Menú móvil -->
-<div id="mobile-menu" class="hidden flex-col space-y-2 bg-black text-white px-4 py-4 rounded-b-lg shadow-lg md:hidden">
-  <a href="inicio.html" class="block hover:text-blue-300">Inicio</a>
-  <a href="#" class="block hover:text-blue-300">Productos</a>
-  <a href="Sesion.html" class="block hover:text-blue-300">Iniciar Sesión</a>
-  <a href="registro.html" class="block hover:text-blue-300 font-semibold underline">Registrarse</a>
-  <a href="#" class="block hover:text-blue-300">Carrito</a>
-</div>
+    <!-- Menú móvil -->
+    <div id="mobile-menu"
+      class="hidden flex-col space-y-2 bg-black text-white px-4 py-4 rounded-b-lg shadow-lg md:hidden">
+      <a href="inicio.html" class="block hover:text-blue-300">Inicio</a>
+      <a href="#" class="block hover:text-blue-300">Productos</a>
+      <a href="Sesion.html" class="block hover:text-blue-300">Iniciar Sesión</a>
+      <a href="registro.html" class="block hover:text-blue-300 font-semibold underline">Registrarse</a>
+      <a href="#" class="block hover:text-blue-300">Carrito</a>
+    </div>
 
 
 
 
-</nav>
+  </nav>
 
 
   <!-- Imagen de fondo con capa oscura -->
-  <section class="relative w-full h-[50rem] mt-16">
+  <section class="relative w-full h-[30rem] mt-16">
     <img src="assets/Logo Urban shop.png" alt="urbanShop" class="w-full h-full object-cover brightness-50" />
-    <div class="absolute inset-0 flex items-center justify-center">
-      <h1 class="text-4xl text-white font-bold drop-shadow-lg uppercase">
-        Bienvenido a Urban Shop</h1>
+    <div class="absolute inset-0 flex items-center justify-center text-center px-4">
+      <h1 class="text-2xl sm:text-3xl md:text-4xl text-white font-bold drop-shadow-lg uppercase">
+        Bienvenido a Urban Shop
+      </h1>
     </div>
+
   </section>
 
   <!-- Sección de categorías -->
@@ -115,7 +116,7 @@
       </button>
     </div>
   </section>
-  
+
   <footer class="bg-black text-center text-white p-4">
     &copy; 2025 Urban Shop. Todos los derechos reservados.
   </footer>
