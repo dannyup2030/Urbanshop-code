@@ -15,7 +15,7 @@ async function fetchImages() {
     // Crea cada tarjeta con imagen y detalles
     images.forEach((img) => {
       const item = document.createElement("div");
-      item.className = "min-w-[250px] bg-gray-100 rounded-xl shadow-md overflow-hidden transition-transform hover:scale-105";
+      item.className = "min-w-[250px] max-w-xs bg-gray-100 rounded-xl shadow-md overflow-hidden transition-transform hover:scale-105 snap-start";
       item.innerHTML = `
         <img src="${img.urls.regular}" alt="${img.alt_description}" class="w-full h-[300px] object-cover" />
          <div class="p-4 space-y-2">
@@ -49,3 +49,17 @@ document.getElementById("next").addEventListener("click", () => {
 document.getElementById("prev").addEventListener("click", () => {
   carousel.scrollBy({ left: -300, behavior: "smooth" });
 });
+
+
+
+
+  const toggleBtn = document.getElementById("toggle-menu");
+  const mobileMenu = document.getElementById("mobile-menu");
+
+  toggleBtn.addEventListener("click", () => {
+    mobileMenu.classList.toggle("hidden");
+  });
+
+
+
+
