@@ -51,3 +51,10 @@ resetForm.addEventListener('submit', (e) => {
   // Redirigir a inicio o login
   window.location.href = 'Sesion.html';
 });
+ // Toggle menú hamburguesa móvil
+    const menuBtn = document.getElementById('menu-btn');
+    const menuMobile = document.getElementById('menu-mobile');
+
+    menuBtn.addEventListener('click', () => {
+      menuMobile.classList.toggle('hidden');
+    });
