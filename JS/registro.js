@@ -39,10 +39,10 @@ Fecha de nacimiento: ${fechaNacimiento}`);
   });
 });
 
-    // Toggle menú hamburguesa móvil
-    const menuBtn = document.getElementById('menu-btn');
-    const menuMobile = document.getElementById('menu-mobile');
+// Toggle menú hamburguesa móvil
+const menuBtn = document.getElementById('menu-btn');
+const menuMobile = document.getElementById('menu-mobile');
 
-    menuBtn.addEventListener('click', () => {
-      menuMobile.classList.toggle('hidden');
-    });
+menuBtn.addEventListener('click', () => {
+  menuMobile.classList.toggle('hidden');
+});

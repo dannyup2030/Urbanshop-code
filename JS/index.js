@@ -53,12 +53,12 @@ document.getElementById("prev").addEventListener("click", () => {
 
 
 
-  const toggleBtn = document.getElementById("toggle-menu");
-  const mobileMenu = document.getElementById("mobile-menu");
+const toggleBtn = document.getElementById("toggle-menu");
+const mobileMenu = document.getElementById("mobile-menu");
 
-  toggleBtn.addEventListener("click", () => {
-    mobileMenu.classList.toggle("hidden");
-  });
+toggleBtn.addEventListener("click", () => {
+  mobileMenu.classList.toggle("hidden");
+});
 
 
 
