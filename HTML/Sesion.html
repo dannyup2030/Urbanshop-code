@@ -49,7 +49,7 @@
   <main class="flex-grow flex items-center justify-center p-6 mt-24">
     <div class="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
       <h2 class="text-2xl font-semibold text-center mb-6 text-gray-800">Iniciar Sesión</h2>
-      <form action="#" method="POST" class="space-y-4">
+      <form action="#" method="POST" class="space-y-4" id="loginForm">
         <div>
           <label for="email" class="block text-sm font-medium text-gray-700">Correo electrónico</label>
           <input type="email" id="email" name="email" required
@@ -60,6 +60,17 @@
           <input type="password" id="password" name="password" required
             class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
+        <!-- Roles -->
+        <div class="mb-4">
+          <label for="rol" class="block text-gray-700 font-bold mb-2">Selecciona tu rol:</label>
+          <select id="rol" name="rol" class="w-full border rounded px-3 py-2">
+            <option value="">-- Selecciona un rol --</option>
+            <option value="cliente">Cliente</option>
+            <option value="admin">Administrador</option>
+            <option value="ventas">Personal de Ventas</option>
+          </select>
+        </div>
+        <!-- Fin roles -->
         <button type="submit"
           class="w-full bg-black text-white py-2 rounded-md hover:bg-blue-700 transition duration-200">Ingresar</button>
         <div class="text-center mt-4">
@@ -79,5 +90,5 @@
   </footer>
   <script src="../JS/navegacion.js"></script>
 </body>
-
+<script src="../JS/sesion.js"></script>
 </html>
