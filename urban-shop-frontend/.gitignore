@@ -1,0 +1,22 @@
+urban-shop-frontend/
+│
+├── src/
+│   ├── components/
+│   │   ├── Navbar.jsx
+│   │   ├── Productos.jsx
+│   │   └── Footer.jsx  
+│   │
+│   ├── pages/
+│   │   └── Inicio.jsx
+│   │
+│   ├── App.jsx
+│   ├── main.jsx
+│   └── style.css
+│
+├── public/
+│   └── img/
+│       ├── Logo Urban shop.png
+│       ├── Rey.png
+│       ├── reyna.png
+│       └── accesorios.png
+├── package.json
