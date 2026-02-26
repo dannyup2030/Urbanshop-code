@@ -1,16 +1,20 @@
-import React, { useState } from "react";
-import Navbar from "../components/Navbar.jsx";
-import { loginUser } from "../services/storeService";
+import React, { useState } from 'react';
+import Navbar from '../components/Navbar.jsx';
+import { loginUser } from '../services/storeService';
 
 export default function Sesion() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [message, setMessage] = useState('');
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
-    const result = loginUser(email, password);
-    setMessage(result.ok ? `Sesión iniciada: ${result.user.nombre}` : result.message);
+    try {
+      const result = await loginUser(email, password);
+      setMessage(`Sesión iniciada: ${result.user.nombre}`);
+    } catch (error) {
+      setMessage(error.message);
+    }
   };
 
   return (

@@ -1,42 +1,28 @@
-require("dotenv").config(); // Carga variables del .env
+require('dotenv').config();
 
-const express = require("express");
-const mysql = require("mysql2");
-const cors = require("cors");
+const express = require('express');
+const cors = require('cors');
+
+const productoRoutes = require('./routes/productoRoutes');
+const usuarioRoutes = require('./routes/usuarioRoutes');
+const pedidoRoutes = require('./routes/pedidoRoutes');
+const systemRoutes = require('./routes/systemRoutes');
 
 const app = express();
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3000;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Conexión a la base de datos
-const db = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+app.get('/', (_req, res) => {
+  res.send('Servidor backend Urban Shop funcionando correctamente');
 });
 
-db.connect((err) => {
-  if (err) {
-    console.error("❌ Error de conexión a la base de datos:", err);
-    return;
-  }
-  console.log("✅ Conectado a la base de datos MySQL");
-});
+app.use('/api/productos', productoRoutes);
+app.use('/api/usuarios', usuarioRoutes);
+app.use('/api/pedidos', pedidoRoutes);
+app.use('/api/sistema', systemRoutes);
 
-// Ruta de prueba
-app.get("/", (req, res) => {
-  res.send("Servidor backend Urban Shop funcionando correctamente");
-});
-
-// Importar y usar las rutas del módulo de productos
-const productoRoutes = require("./routes/productoRoutes");
-app.use("/api/productos", productoRoutes); // Ej: http://localhost:3001/api/productos
-
-// Iniciar servidor
 app.listen(port, () => {
   console.log(`🚀 Servidor backend iniciado en http://localhost:${port}`);
 });

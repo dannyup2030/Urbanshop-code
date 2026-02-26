@@ -1,16 +1,9 @@
-const STORAGE_KEYS = {
-  users: "urbanshop_users",
-  products: "urbanshop_products",
-  orders: "urbanshop_orders",
-  cart: "urbanshop_cart",
-  currentUser: "urbanshop_current_user",
-};
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-const defaultProducts = [
-  { id: "prod-1", nombre: "Camiseta Urban Classic", descripcion: "Algodón 100% premium", precio: 89900, imagen_url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=500&q=80", stock: 25, categoria: "hombres" },
-  { id: "prod-2", nombre: "Jeans Slim Fit", descripcion: "Denim elástico cómodo", precio: 129900, imagen_url: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=500&q=80", stock: 18, categoria: "hombres" },
-  { id: "prod-3", nombre: "Vestido Floral", descripcion: "Tela ligera de verano", precio: 109900, imagen_url: "https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?auto=format&fit=crop&w=500&q=80", stock: 14, categoria: "mujeres" },
-];
+const STORAGE_KEYS = {
+  cart: 'urbanshop_cart',
+  currentUser: 'urbanshop_current_user',
+};
 
 const read = (key, fallback) => {
   const raw = localStorage.getItem(key);
@@ -19,82 +12,79 @@ const read = (key, fallback) => {
 
 const write = (key, value) => localStorage.setItem(key, JSON.stringify(value));
 
+const apiRequest = async (path, options = {}) => {
+  const response = await fetch(`${API_BASE}${path}`, {
+    headers: { 'Content-Type': 'application/json' },
+    ...options,
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || 'Error de conexión con el servidor');
+  return data;
+};
+
 export const initializeStore = () => {
-  if (!localStorage.getItem(STORAGE_KEYS.products)) {
-    write(STORAGE_KEYS.products, defaultProducts);
-  }
-  if (!localStorage.getItem(STORAGE_KEYS.users)) write(STORAGE_KEYS.users, []);
-  if (!localStorage.getItem(STORAGE_KEYS.orders)) write(STORAGE_KEYS.orders, []);
   if (!localStorage.getItem(STORAGE_KEYS.cart)) write(STORAGE_KEYS.cart, []);
 };
 
-export const getProducts = () => read(STORAGE_KEYS.products, []);
-export const saveProducts = (products) => write(STORAGE_KEYS.products, products);
+export const getProducts = () => apiRequest('/productos');
 
-export const registerUser = (user) => {
-  const users = read(STORAGE_KEYS.users, []);
-  if (users.some((u) => u.email.toLowerCase() === user.email.toLowerCase())) {
-    return { ok: false, message: "Este correo ya está registrado." };
-  }
-  users.push({ ...user, id: crypto.randomUUID() });
-  write(STORAGE_KEYS.users, users);
+export const createProduct = (product) => apiRequest('/productos', { method: 'POST', body: JSON.stringify(product) });
+
+export const updateProduct = (id, product) => apiRequest(`/productos/${id}`, { method: 'PUT', body: JSON.stringify(product) });
+
+export const deleteProductById = (id) => apiRequest(`/productos/${id}`, { method: 'DELETE' });
+
+export const registerUser = async (user) => {
+  await apiRequest('/usuarios/registro', { method: 'POST', body: JSON.stringify(user) });
   return { ok: true };
 };
 
-export const loginUser = (email, password) => {
-  const users = read(STORAGE_KEYS.users, []);
-  const user = users.find((u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
-  if (!user) return { ok: false, message: "Credenciales inválidas." };
-  write(STORAGE_KEYS.currentUser, user);
-  return { ok: true, user };
+export const loginUser = async (email, password) => {
+  const data = await apiRequest('/usuarios/login', { method: 'POST', body: JSON.stringify({ email, password }) });
+  write(STORAGE_KEYS.currentUser, data.user);
+  return { ok: true, user: data.user };
 };
 
 export const getCurrentUser = () => read(STORAGE_KEYS.currentUser, null);
-export const logoutUser = () => localStorage.removeItem(STORAGE_KEYS.currentUser);
 
 export const getCart = () => read(STORAGE_KEYS.cart, []);
+
 export const addToCart = (productId, quantity = 1) => {
-  const products = getProducts();
-  const product = products.find((p) => p.id === productId);
-  if (!product) return;
   const cart = getCart();
   const existing = cart.find((i) => i.productId === productId);
-  if (existing) {
-    existing.quantity += quantity;
-  } else {
-    cart.push({ productId, quantity });
-  }
+  if (existing) existing.quantity += quantity;
+  else cart.push({ productId, quantity });
   write(STORAGE_KEYS.cart, cart);
 };
 
 export const clearCart = () => write(STORAGE_KEYS.cart, []);
 
-export const placeOrder = () => {
+export const placeOrder = async () => {
   const user = getCurrentUser();
   const cart = getCart();
-  const products = getProducts();
-  if (!user) return { ok: false, message: "Debes iniciar sesión para hacer pedidos." };
-  if (!cart.length) return { ok: false, message: "No hay productos en el carrito." };
+  if (!user) return { ok: false, message: 'Debes iniciar sesión para hacer pedidos.' };
+  if (!cart.length) return { ok: false, message: 'No hay productos en el carrito.' };
 
-  const items = cart.map((item) => {
-    const product = products.find((p) => p.id === item.productId);
-    return { ...item, nombre: product?.nombre || "Producto", precio: product?.precio || 0 };
-  });
-
-  const total = items.reduce((acc, item) => acc + item.precio * item.quantity, 0);
-  const orders = read(STORAGE_KEYS.orders, []);
-  orders.push({ id: crypto.randomUUID(), userEmail: user.email, fecha: new Date().toISOString(), items, total });
-  write(STORAGE_KEYS.orders, orders);
-  clearCart();
-  return { ok: true };
+  try {
+    await apiRequest('/pedidos', {
+      method: 'POST',
+      body: JSON.stringify({ userEmail: user.email, items: cart }),
+    });
+    clearCart();
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, message: error.message };
+  }
 };
 
-export const getOrders = () => read(STORAGE_KEYS.orders, []);
-export const getUsers = () => read(STORAGE_KEYS.users, []);
+export const getOrders = () => apiRequest('/pedidos');
 
-export const getSystemInfo = () => ({
-  usuarios: getUsers().length,
-  productos: getProducts().length,
-  pedidos: getOrders().length,
-  usuarioActivo: getCurrentUser()?.email || "Sin sesión",
-});
+export const getUsers = () => apiRequest('/usuarios');
+
+export const getSystemInfo = async () => {
+  const info = await apiRequest('/sistema/info');
+  return {
+    ...info,
+    usuarioActivo: getCurrentUser()?.email || 'Sin sesión',
+  };
+};

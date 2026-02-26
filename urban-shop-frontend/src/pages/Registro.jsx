@@ -1,16 +1,20 @@
-import React, { useState } from "react";
-import Navbar from "../components/Navbar.jsx";
-import { registerUser } from "../services/storeService";
+import React, { useState } from 'react';
+import Navbar from '../components/Navbar.jsx';
+import { registerUser } from '../services/storeService';
 
 export default function Registro() {
-  const [form, setForm] = useState({ nombre: "", email: "", celular: "", cedula: "", fechaNacimiento: "", password: "" });
-  const [message, setMessage] = useState("");
+  const [form, setForm] = useState({ nombre: '', email: '', celular: '', cedula: '', fechaNacimiento: '', password: '' });
+  const [message, setMessage] = useState('');
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
-    const result = registerUser(form);
-    setMessage(result.ok ? "Usuario registrado correctamente." : result.message);
-    if (result.ok) setForm({ nombre: "", email: "", celular: "", cedula: "", fechaNacimiento: "", password: "" });
+    try {
+      await registerUser(form);
+      setMessage('Usuario registrado correctamente.');
+      setForm({ nombre: '', email: '', celular: '', cedula: '', fechaNacimiento: '', password: '' });
+    } catch (error) {
+      setMessage(error.message);
+    }
   };
 
   return (

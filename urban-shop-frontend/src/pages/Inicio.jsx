@@ -1,26 +1,33 @@
-import React, { useEffect, useState } from "react";
-import Navbar from "../components/Navbar.jsx";
-import Productos from "../components/Productos.jsx";
-import { addToCart, getProducts, initializeStore } from "../services/storeService";
+import React, { useEffect, useState } from 'react';
+import Navbar from '../components/Navbar.jsx';
+import Productos from '../components/Productos.jsx';
+import { addToCart, getProducts, initializeStore } from '../services/storeService';
 
 export default function Inicio() {
   const [products, setProducts] = useState([]);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
-    initializeStore();
-    setProducts(getProducts());
+    const load = async () => {
+      initializeStore();
+      try {
+        setProducts(await getProducts());
+      } catch (error) {
+        setMessage(error.message);
+      }
+    };
+    load();
   }, []);
 
   const scroll = (direction) => {
-    const carousel = document.getElementById("carousel");
-    if (carousel) carousel.scrollLeft += direction === "left" ? -300 : 300;
+    const carousel = document.getElementById('carousel');
+    if (carousel) carousel.scrollLeft += direction === 'left' ? -300 : 300;
   };
 
   const handleAddToCart = (id, quantity) => {
     addToCart(id, quantity);
-    setMessage("Producto agregado al carrito.");
-    setTimeout(() => setMessage(""), 1800);
+    setMessage('Producto agregado al carrito.');
+    setTimeout(() => setMessage(''), 1800);
   };
 
   return (
@@ -37,9 +44,9 @@ export default function Inicio() {
         <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">Nuestros Productos</h2>
         {message && <p className="text-center text-green-700 mb-4">{message}</p>}
         <div className="relative max-w-7xl mx-auto">
-          <button onClick={() => scroll("left")} className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black bg-opacity-50 hover:bg-opacity-80 text-white p-2 rounded-full">&#8592;</button>
+          <button onClick={() => scroll('left')} className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black bg-opacity-50 hover:bg-opacity-80 text-white p-2 rounded-full">&#8592;</button>
           <Productos products={products} onAddToCart={handleAddToCart} />
-          <button onClick={() => scroll("right")} className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black bg-opacity-50 hover:bg-opacity-80 text-white p-2 rounded-full">&#8594;</button>
+          <button onClick={() => scroll('right')} className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black bg-opacity-50 hover:bg-opacity-80 text-white p-2 rounded-full">&#8594;</button>
         </div>
       </section>
 
