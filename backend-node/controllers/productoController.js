@@ -1,6 +1,16 @@
 const db = require('../config/conexion');
 
-const obtenerProductos = async (req, res) => {
+const validateProductPayload = ({ nombre, descripcion, precio, imagen_url, stock, categoria }) => {
+  if (!nombre || typeof nombre !== 'string') return 'El nombre es obligatorio.';
+  if (descripcion == null) return 'La descripción es obligatoria.';
+  if (!Number.isFinite(Number(precio)) || Number(precio) < 0) return 'El precio debe ser válido.';
+  if (!Number.isInteger(Number(stock)) || Number(stock) < 0) return 'El stock debe ser un número entero válido.';
+  if (!categoria || typeof categoria !== 'string') return 'La categoría es obligatoria.';
+  if (!imagen_url || typeof imagen_url !== 'string') return 'La imagen es obligatoria.';
+  return null;
+};
+
+const obtenerProductos = async (_req, res) => {
   try {
     const [resultados] = await db.query('SELECT * FROM productos ORDER BY id DESC');
     res.json(resultados);
@@ -24,12 +34,13 @@ const obtenerProductoPorId = async (req, res) => {
 
 const crearProducto = async (req, res) => {
   try {
-    const { nombre, descripcion, precio, imagen_url, stock, categoria } = req.body;
-    const query = `
-      INSERT INTO productos (nombre, descripcion, precio, imagen_url, stock, categoria)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `;
-    const [resultado] = await db.query(query, [nombre, descripcion, precio, imagen_url, stock, categoria]);
+    const payload = req.body;
+    const validationError = validateProductPayload(payload);
+    if (validationError) return res.status(400).json({ error: validationError });
+
+    const { nombre, descripcion, precio, imagen_url, stock, categoria } = payload;
+    const query = 'INSERT INTO productos (nombre, descripcion, precio, imagen_url, stock, categoria) VALUES (?, ?, ?, ?, ?, ?)';
+    const [resultado] = await db.query(query, [nombre, descripcion, Number(precio), imagen_url, Number(stock), categoria]);
     res.status(201).json({ mensaje: 'Producto creado correctamente', id: resultado.insertId });
   } catch (error) {
     console.error('Error al insertar producto:', error);
@@ -40,9 +51,13 @@ const crearProducto = async (req, res) => {
 const actualizarProducto = async (req, res) => {
   try {
     const { id } = req.params;
-    const { nombre, descripcion, precio, imagen_url, stock, categoria } = req.body;
+    const payload = req.body;
+    const validationError = validateProductPayload(payload);
+    if (validationError) return res.status(400).json({ error: validationError });
+
+    const { nombre, descripcion, precio, imagen_url, stock, categoria } = payload;
     const sql = 'UPDATE productos SET nombre=?, descripcion=?, precio=?, imagen_url=?, stock=?, categoria=? WHERE id=?';
-    const [resultado] = await db.query(sql, [nombre, descripcion, precio, imagen_url, stock, categoria, id]);
+    const [resultado] = await db.query(sql, [nombre, descripcion, Number(precio), imagen_url, Number(stock), categoria, id]);
     if (!resultado.affectedRows) return res.status(404).json({ error: 'Producto no encontrado' });
     res.json({ mensaje: 'Producto actualizado correctamente' });
   } catch (error) {

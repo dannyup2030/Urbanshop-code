@@ -25,7 +25,7 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     const [users] = await db.query(
-      'SELECT id, nombre, email FROM usuarios WHERE email = ? AND password = ? LIMIT 1',
+      'SELECT id, nombre, email, rol FROM usuarios WHERE email = ? AND password = ? LIMIT 1',
       [email, password],
     );
     if (!users.length) return res.status(401).json({ error: 'Credenciales inválidas.' });

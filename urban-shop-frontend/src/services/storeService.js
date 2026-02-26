@@ -14,12 +14,17 @@ const write = (key, value) => localStorage.setItem(key, JSON.stringify(value));
 
 const apiRequest = async (path, options = {}) => {
   const response = await fetch(`${API_BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
     ...options,
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || 'Error de conexión con el servidor');
   return data;
+};
+
+const getAuthHeaders = () => {
+  const user = getCurrentUser();
+  return user?.rol ? { 'x-user-role': user.rol } : {};
 };
 
 export const initializeStore = () => {
@@ -28,11 +33,11 @@ export const initializeStore = () => {
 
 export const getProducts = () => apiRequest('/productos');
 
-export const createProduct = (product) => apiRequest('/productos', { method: 'POST', body: JSON.stringify(product) });
+export const createProduct = (product) => apiRequest('/productos', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(product) });
 
-export const updateProduct = (id, product) => apiRequest(`/productos/${id}`, { method: 'PUT', body: JSON.stringify(product) });
+export const updateProduct = (id, product) => apiRequest(`/productos/${id}`, { method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(product) });
 
-export const deleteProductById = (id) => apiRequest(`/productos/${id}`, { method: 'DELETE' });
+export const deleteProductById = (id) => apiRequest(`/productos/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
 
 export const registerUser = async (user) => {
   await apiRequest('/usuarios/registro', { method: 'POST', body: JSON.stringify(user) });
