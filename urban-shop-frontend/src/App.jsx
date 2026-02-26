@@ -1,22 +1,27 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-
-// Páginas (luego migramos el HTML a cada una)
+import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
 import Inicio from "./pages/Inicio.jsx";
 import Registro from "./pages/Registro.jsx";
 import Sesion from "./pages/Sesion.jsx";
 import Recuperar from "./pages/Recuperar.jsx";
+import GestionProductos from "./pages/GestionProductos.jsx";
+import Pedidos from "./pages/Pedidos.jsx";
+import Sistema from "./pages/Sistema.jsx";
 
 function App() {
   return (
-    <Router>
+    <HashRouter>
       <Routes>
         <Route path="/" element={<Inicio />} />
         <Route path="/registro" element={<Registro />} />
-        <Route path="/Sesion" element={<Sesion />} />
+        <Route path="/sesion" element={<Sesion />} />
         <Route path="/recuperar" element={<Recuperar />} />
+        <Route path="/gestion-productos" element={<GestionProductos />} />
+        <Route path="/pedidos" element={<Pedidos />} />
+        <Route path="/sistema" element={<Sistema />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </Router>
+      </HashRouter>
   );
 }
 
