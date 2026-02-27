@@ -93,7 +93,7 @@ router.post('/registro', async (req, res) => {
     const escapedColumns = columns.map((column) => `\`${column}\``).join(', ');
 
     await db.query(
-       `INSERT INTO usuarios (${escapedColumns}) VALUES (${placeholders})`,
+      `INSERT INTO usuarios (${escapedColumns}) VALUES (${placeholders})`,
       values,
     );
 
@@ -136,5 +136,6 @@ router.get('/', async (_req, res) => {
     res.status(500).json({ error: 'Error al consultar usuarios' });
   }
 });
+
 
 module.exports = router;

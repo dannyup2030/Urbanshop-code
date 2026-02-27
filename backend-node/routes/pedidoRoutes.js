@@ -1,5 +1,6 @@
 const express = require('express');
 const db = require('../config/conexion');
+const { getProductoColumnMap } = require('../utils/productColumns');
 
 const router = express.Router();
 
@@ -12,11 +13,17 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Pedido inválido.' });
     }
 
+    const productColumns = await getProductoColumnMap();
+    if (!productColumns.nombre || !productColumns.precio || !productColumns.stock) {
+      connection.release();
+      return res.status(500).json({ error: 'La tabla productos no tiene columnas compatibles para crear pedidos.' });
+    }
+
     await connection.beginTransaction();
 
     const productIds = items.map((i) => i.productId);
     const [products] = await connection.query(
-      `SELECT id, nombre, precio, stock FROM productos WHERE id IN (${productIds.map(() => '?').join(',')})`,
+      `SELECT id, \`${productColumns.nombre}\` AS nombre, \`${productColumns.precio}\` AS precio, \`${productColumns.stock}\` AS stock FROM productos WHERE id IN (${productIds.map(() => '?').join(',')})`,
       productIds,
     );
 
@@ -26,7 +33,7 @@ router.post('/', async (req, res) => {
     for (const item of items) {
       const product = map.get(item.productId);
       if (!product) throw new Error(`Producto no encontrado: ${item.productId}`);
-      if (product.stock < item.quantity) throw new Error(`Stock insuficiente para ${product.nombre}`);
+      if (Number(product.stock) < Number(item.quantity)) throw new Error(`Stock insuficiente para ${product.nombre}`);
       total += Number(product.precio) * Number(item.quantity);
     }
 
@@ -41,7 +48,7 @@ router.post('/', async (req, res) => {
         'INSERT INTO pedido_items (pedido_id, producto_id, cantidad, precio_unitario) VALUES (?, ?, ?, ?)',
         [orderResult.insertId, item.productId, item.quantity, product.precio],
       );
-      await connection.query('UPDATE productos SET stock = stock - ? WHERE id = ?', [item.quantity, item.productId]);
+      await connection.query(`UPDATE productos SET \`${productColumns.stock}\` = \`${productColumns.stock}\` - ? WHERE id = ?`, [item.quantity, item.productId]);
     }
 
     await connection.commit();

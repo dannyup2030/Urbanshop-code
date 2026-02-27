@@ -1,16 +1,28 @@
-// controllers/productoController.js
-const db = require('../config/conexion');
+const db = require('../config/conexion');  // ✅ CORRECTO
+const { getProductoColumnMap } = require('../utils/productColumns');
+
+
+const normalizeProductPayload = (payload = {}) => ({
+  nombre: (payload.nombre ?? payload.name ?? payload.titulo ?? '').toString().trim(),
+  descripcion: (payload.descripcion ?? payload.description ?? '').toString().trim(),
+  precio: payload.precio ?? payload.price,
+  imagen_url: (payload.imagen_url ?? payload.imagen ?? payload.image ?? payload.image_url ?? '').toString().trim(),
+  stock: payload.stock ?? payload.cantidad,
+  categoria: (payload.categoria ?? payload.category ?? '').toString().trim(),
+});
 
 const validateProductPayload = (payload = {}) => {
   if (!payload || typeof payload !== 'object') return 'El cuerpo de la solicitud es inválido.';
-  const { nombre, descripcion, precio, imagen_url, stock, categoria } = payload;
-  if (!nombre || typeof nombre !== 'string') return 'El nombre es obligatorio.';
-  if (descripcion == null) return 'La descripción es obligatoria.';
-  if (!Number.isFinite(Number(precio)) || Number(precio) < 0) return 'El precio debe ser válido.';
-  if (!Number.isInteger(Number(stock)) || Number(stock) < 0) return 'El stock debe ser un número entero válido.';
-  if (!categoria || typeof categoria !== 'string') return 'La categoría es obligatoria.';
-  if (!imagen_url || typeof imagen_url !== 'string') return 'La imagen es obligatoria.';
-  return null;
+  const normalized = normalizeProductPayload(payload);
+
+  if (!normalized.nombre) return 'El nombre es obligatorio.';
+  if (!normalized.descripcion) return 'La descripción es obligatoria.';
+  if (!Number.isFinite(Number(normalized.precio)) || Number(normalized.precio) < 0) return 'El precio debe ser válido.';
+  if (!Number.isInteger(Number(normalized.stock)) || Number(normalized.stock) < 0) return 'El stock debe ser un número entero válido.';
+  if (!normalized.categoria) return 'La categoría es obligatoria.';
+  if (!normalized.imagen_url) return 'La imagen es obligatoria.';
+
+  return normalized;
 };
 const obtenerProductos = async (_req, res) => {
   try {
@@ -34,13 +46,38 @@ const obtenerProductoPorId = async (req, res) => {
 };
 const crearProducto = async (req, res) => {
   try {
-    const payload = req.body?.producto ?? req.body ?? {};
-    const validationError = validateProductPayload(payload);
-    if (validationError) return res.status(400).json({ error: validationError });
+     const payload = req.body?.producto ?? req.body ?? {};
+    const validated = validateProductPayload(payload);
+    if (typeof validated === 'string') return res.status(400).json({ error: validated });
 
-    const { nombre, descripcion, precio, imagen_url, stock, categoria } = payload;
-    const query = 'INSERT INTO productos (nombre, descripcion, precio, imagen_url, stock, categoria) VALUES (?, ?, ?, ?, ?, ?)';
-    const [resultado] = await db.query(query, [nombre, descripcion, Number(precio), imagen_url, Number(stock), categoria]);
+    const columns = await getProductoColumnMap();
+    if (!columns.nombre || !columns.precio || !columns.stock) {
+      return res.status(500).json({ error: 'La tabla productos no tiene columnas compatibles para nombre/precio/stock.' });
+    }
+
+    const insertColumns = [
+      columns.nombre,
+      columns.descripcion,
+      columns.precio,
+      columns.imagen,
+      columns.stock,
+      columns.categoria,
+    ].filter(Boolean);
+
+    const dataBySemantic = {
+      [columns.nombre]: validated.nombre,
+      [columns.descripcion]: validated.descripcion,
+      [columns.precio]: Number(validated.precio),
+      [columns.imagen]: validated.imagen_url,
+      [columns.stock]: Number(validated.stock),
+      [columns.categoria]: validated.categoria,
+    };
+
+    const placeholders = insertColumns.map(() => '?').join(', ');
+    const escapedColumns = insertColumns.map((column) => `\`${column}\``).join(', ');
+    const values = insertColumns.map((column) => dataBySemantic[column]);
+
+    const [resultado] = await db.query(`INSERT INTO productos (${escapedColumns}) VALUES (${placeholders})`, values);
     res.status(201).json({ mensaje: 'Producto creado correctamente', id: resultado.insertId });
   } catch (error) {
     console.error('Error al insertar producto:', error);
@@ -51,12 +88,28 @@ const crearProducto = async (req, res) => {
 const actualizarProducto = async (req, res) => {
   try {
     const { id } = req.params;
-    ;
-    if (validationError) return res.status(400).json({ error: validationError });
+     const payload = req.body?.producto ?? req.body ?? {};
+    const validated = validateProductPayload(payload);
+    if (typeof validated === 'string') return res.status(400).json({ error: validated });
 
-     const { nombre, descripcion, precio, imagen_url, stock, categoria } = payload;
-    const sql = 'UPDATE productos SET nombre=?, descripcion=?, precio=?, imagen_url=?, stock=?, categoria=? WHERE id=?';
-    const [resultado] = await db.query(sql, [nombre, descripcion, Number(precio), imagen_url, Number(stock), categoria, id]);
+    const columns = await getProductoColumnMap();
+    if (!columns.nombre || !columns.precio || !columns.stock) {
+      return res.status(500).json({ error: 'La tabla productos no tiene columnas compatibles para nombre/precio/stock.' });
+    }
+
+    const updates = [
+      [columns.nombre, validated.nombre],
+      [columns.descripcion, validated.descripcion],
+      [columns.precio, Number(validated.precio)],
+      [columns.imagen, validated.imagen_url],
+      [columns.stock, Number(validated.stock)],
+      [columns.categoria, validated.categoria],
+    ].filter(([column]) => Boolean(column));
+
+    const setSql = updates.map(([column]) => `\`${column}\` = ?`).join(', ');
+    const values = updates.map(([, value]) => value);
+
+    const [resultado] = await db.query(`UPDATE productos SET ${setSql} WHERE id = ?`, [...values, id]);
     if (!resultado.affectedRows) return res.status(404).json({ error: 'Producto no encontrado' });
     res.json({ mensaje: 'Producto actualizado correctamente' });
   } catch (error) {
@@ -82,4 +135,4 @@ module.exports = {
   crearProducto,
   actualizarProducto,
   eliminarProducto,
-};
+  };
