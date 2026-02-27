@@ -6,13 +6,6 @@ const router = express.Router();
 let cachedPasswordColumn;
 let cachedUserColumns;
 
-const getUserColumns = async () => {
-  if (cachedUserColumns) return cachedUserColumns;
-  const [rows] = await db.query('SHOW COLUMNS FROM usuarios');
-  cachedUserColumns = rows.map((row) => row.Field);
-  return cachedUserColumns;
-};
-
 const normalize = (value) =>
   value
     .toString()
@@ -20,46 +13,88 @@ const normalize = (value) =>
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase();
 
+const getUserColumns = async () => {
+  if (cachedUserColumns) return cachedUserColumns;
+  const [rows] = await db.query('SHOW COLUMNS FROM usuarios');
+  cachedUserColumns = rows;
+  return cachedUserColumns;
+};
+
+const findColumn = (columns, candidates, { fuzzy = false } = {}) => {
+  const exact = columns.find((column) => candidates.includes(normalize(column.Field)));
+  if (exact) return exact.Field;
+  if (!fuzzy) return null;
+
+  const fuzzyMatch = columns.find((column) => {
+    const name = normalize(column.Field);
+    return candidates.some((candidate) => name.includes(candidate));
+  });
+
+  return fuzzyMatch ? fuzzyMatch.Field : null;
+};
+
 const getPasswordColumn = async () => {
   if (cachedPasswordColumn) return cachedPasswordColumn;
 
   const userColumns = await getUserColumns();
+  const passwordColumn = findColumn(userColumns, ['password', 'contrasena', 'contrasenia', 'clave', 'pass'], { fuzzy: true });
 
-  const exactCandidates = ['password', 'contrasena', 'contrasenia', 'clave'];
-  const exactMatch = userColumns.find((column) => exactCandidates.includes(normalize(column)));
-  if (exactMatch) {
-    cachedPasswordColumn = exactMatch;
-    return cachedPasswordColumn;
+  if (!passwordColumn) {
+    throw new Error(`La tabla usuarios no tiene una columna de contraseña compatible. Columnas encontradas: ${userColumns.map((c) => c.Field).join(', ')}`);
   }
 
-  const fuzzyMatch = userColumns.find((column) => {
-    const normalizedColumn = normalize(column);
-    return (
-      normalizedColumn.includes('password')
-      || normalizedColumn.includes('pass')
-      || normalizedColumn.includes('contras')
-      || normalizedColumn.includes('clave')
-    );
-  });
-
-  if (fuzzyMatch) {
-    cachedPasswordColumn = fuzzyMatch;
-    return cachedPasswordColumn;
-  }
-
-  throw new Error(`La tabla usuarios no tiene una columna de contraseña compatible. Columnas encontradas: ${userColumns.join(', ')}`);
+  cachedPasswordColumn = passwordColumn;
+  return cachedPasswordColumn;
 };
+
+const getRequiredColumnsWithoutDefault = (columns) =>
+  columns
+    .filter((column) => column.Null === 'NO' && column.Default == null && !/auto_increment/i.test(column.Extra || ''))
+    .map((column) => column.Field);
 
 router.post('/registro', async (req, res) => {
   try {
-    const { nombre, email, celular, cedula, fechaNacimiento, password } = req.body;
+    const body = req.body || {};
+    const { nombre, apellido = '', email, celular, cedula, fechaNacimiento, fecha_nacimiento, password } = body;
+
+    if (!nombre || !email || !password) {
+      return res.status(400).json({ error: 'Los campos nombre, email y password son obligatorios.' });
+    }
+
+    const userColumns = await getUserColumns();
     const passwordColumn = await getPasswordColumn();
+    const apellidoColumn = findColumn(userColumns, ['apellido']);
+    const fechaColumn = findColumn(userColumns, ['fecha_nacimiento', 'fechanacimiento', 'nacimiento'], { fuzzy: true });
+
     const [exists] = await db.query('SELECT id FROM usuarios WHERE email = ? LIMIT 1', [email]);
     if (exists.length) return res.status(409).json({ error: 'Este correo ya está registrado.' });
 
+    const insertData = {
+      nombre,
+      email,
+      celular: celular || null,
+      cedula: cedula || null,
+      ...(fechaColumn ? { [fechaColumn]: fechaNacimiento || fecha_nacimiento || null } : {}),
+      [passwordColumn]: password,
+    };
+
+    if (apellidoColumn) insertData[apellidoColumn] = apellido;
+
+    const requiredColumns = getRequiredColumnsWithoutDefault(userColumns);
+    const missingRequired = requiredColumns.filter((column) => insertData[column] == null);
+
+    if (missingRequired.length) {
+      return res.status(400).json({ error: `Faltan campos obligatorios para registrar usuario: ${missingRequired.join(', ')}` });
+    }
+
+    const columns = Object.keys(insertData);
+    const values = Object.values(insertData);
+    const placeholders = columns.map(() => '?').join(', ');
+    const escapedColumns = columns.map((column) => `\`${column}\``).join(', ');
+
     await db.query(
-      `INSERT INTO usuarios (nombre, email, celular, cedula, fecha_nacimiento, \`${passwordColumn}\`) VALUES (?, ?, ?, ?, ?, ?)`,
-      [nombre, email, celular, cedula, fechaNacimiento, password],
+      `INSERT INTO usuarios (${escapedColumns}) VALUES (${placeholders})`,
+      values,
     );
 
     return res.status(201).json({ mensaje: 'Usuario registrado correctamente.' });
@@ -71,10 +106,10 @@ router.post('/registro', async (req, res) => {
 
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    {};
     const passwordColumn = await getPasswordColumn();
     const [users] = await db.query(
-      `SELECT id, nombre, email, rol FROM usuarios WHERE email = ? AND \`${passwordColumn}\` = ? LIMIT 1`,
+       `SELECT id, nombre, email, rol FROM usuarios WHERE email = ? AND \`${passwordColumn}\` = ? LIMIT 1`,
       [email, password],
     );
     if (!users.length) return res.status(401).json({ error: 'Credenciales inválidas.' });
@@ -94,4 +129,6 @@ router.get('/', async (_req, res) => {
     res.status(500).json({ error: 'Error al consultar usuarios' });
   }
 });
+
+
 module.exports = router;
