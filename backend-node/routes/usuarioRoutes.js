@@ -93,7 +93,7 @@ router.post('/registro', async (req, res) => {
     const escapedColumns = columns.map((column) => `\`${column}\``).join(', ');
 
     await db.query(
-      `INSERT INTO usuarios (${escapedColumns}) VALUES (${placeholders})`,
+       `INSERT INTO usuarios (${escapedColumns}) VALUES (${placeholders})`,
       values,
     );
 
@@ -106,11 +106,18 @@ router.post('/registro', async (req, res) => {
 
 router.post('/login', async (req, res) => {
   try {
-    {};
+    const credentials = req.body || {};
+    const userEmail = (credentials.email || '').toString().trim();
+    const userPassword = (credentials.password || '').toString();
+
+    if (!userEmail || !userPassword) {
+      return res.status(400).json({ error: 'Los campos email y password son obligatorios.' });
+    }
+
     const passwordColumn = await getPasswordColumn();
     const [users] = await db.query(
-       `SELECT id, nombre, email, rol FROM usuarios WHERE email = ? AND \`${passwordColumn}\` = ? LIMIT 1`,
-      [email, password],
+      `SELECT id, nombre, email, rol FROM usuarios WHERE email = ? AND \`${passwordColumn}\` = ? LIMIT 1`,
+      [userEmail, userPassword],
     );
     if (!users.length) return res.status(401).json({ error: 'Credenciales inválidas.' });
     return res.json({ mensaje: 'Sesión iniciada correctamente.', user: users[0] });
@@ -129,6 +136,5 @@ router.get('/', async (_req, res) => {
     res.status(500).json({ error: 'Error al consultar usuarios' });
   }
 });
-
 
 module.exports = router;
