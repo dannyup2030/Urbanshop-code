@@ -48,7 +48,7 @@ router.post('/', async (req, res) => {
         'INSERT INTO pedido_items (pedido_id, producto_id, cantidad, precio_unitario) VALUES (?, ?, ?, ?)',
         [orderResult.insertId, item.productId, item.quantity, product.precio],
       );
-      await connection.query(`UPDATE productos SET \`${productColumns.stock}\` = \`${productColumns.stock}\` - ? WHERE id = ?`, [item.quantity, item.productId]);
+       await connection.query(`UPDATE productos SET \`${productColumns.stock}\` = \`${productColumns.stock}\` - ? WHERE id = ?`, [item.quantity, item.productId]);
     }
 
     await connection.commit();

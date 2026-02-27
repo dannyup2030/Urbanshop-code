@@ -1,6 +1,6 @@
-const db = require('../config/conexion');  // ✅ CORRECTO
+// controllers/productoController.js
+const db = require('../config/conexion');
 const { getProductoColumnMap } = require('../utils/productColumns');
-
 
 const normalizeProductPayload = (payload = {}) => ({
   nombre: (payload.nombre ?? payload.name ?? payload.titulo ?? '').toString().trim(),
@@ -46,7 +46,7 @@ const obtenerProductoPorId = async (req, res) => {
 };
 const crearProducto = async (req, res) => {
   try {
-     const payload = req.body?.producto ?? req.body ?? {};
+      const payload = req.body?.producto ?? req.body ?? {};
     const validated = validateProductPayload(payload);
     if (typeof validated === 'string') return res.status(400).json({ error: validated });
 
@@ -135,4 +135,4 @@ module.exports = {
   crearProducto,
   actualizarProducto,
   eliminarProducto,
-  };
+};

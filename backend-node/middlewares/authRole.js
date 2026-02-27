@@ -1,8 +1,9 @@
+const ADMIN_ROLES = new Set(['administrador', 'admin']);
+
 const requireAdmin = (req, res, next) => {
+  const role = (req.headers['x-user-role'] || '').toString().trim().toLowerCase();
 
- minRoles = new Set(['administrador', 'admin']);
-
-  if (!adminRoles.has(role)) {
+  if (!ADMIN_ROLES.has(role)) {
     return res.status(403).json({ error: 'Solo un administrador puede gestionar productos.' });
   }
 

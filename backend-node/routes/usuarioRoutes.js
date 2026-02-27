@@ -1,4 +1,3 @@
-const express = require('express');
 const db = require('../config/conexion');
 
 const router = express.Router();
@@ -136,6 +135,5 @@ router.get('/', async (_req, res) => {
     res.status(500).json({ error: 'Error al consultar usuarios' });
   }
 });
-
 
 module.exports = router;
