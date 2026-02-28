@@ -2,14 +2,35 @@
 const db = require('../config/conexion');
 const { getProductoColumnMap } = require('../utils/productColumns');
 
+const normalizeKey = (value) =>
+  value
+    .toString()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
+
+const getField = (payload, aliases, fallback = '') => {
+  if (!payload || typeof payload !== 'object') return fallback;
+
+  const normalizedAliases = aliases.map((alias) => normalizeKey(alias));
+  const match = Object.keys(payload).find((key) => normalizedAliases.includes(normalizeKey(key)));
+
+  if (!match) return fallback;
+  return payload[match];
+};
+
 const normalizeProductPayload = (payload = {}) => ({
-  nombre: (payload.nombre ?? payload.name ?? payload.titulo ?? '').toString().trim(),
-  descripcion: (payload.descripcion ?? payload.description ?? '').toString().trim(),
-  precio: payload.precio ?? payload.price,
-  imagen_url: (payload.imagen_url ?? payload.imagen ?? payload.image ?? payload.image_url ?? '').toString().trim(),
-  stock: payload.stock ?? payload.cantidad,
-  categoria: (payload.categoria ?? payload.category ?? '').toString().trim(),
+   nombre: (getField(payload, ['nombre', 'name', 'titulo', 'producto', 'nombre_producto', 'producto_nombre']) ?? '').toString().trim(),
+  descripcion: (getField(payload, ['descripcion', 'description', 'detalle', 'descripcion_producto']) ?? '').toString().trim(),
+  precio: getField(payload, ['precio', 'price', 'valor', 'costo', 'precio_producto']),
+  imagen_url: (getField(payload, ['imagen_url', 'imagen', 'image', 'image_url', 'url_imagen', 'foto']) ?? '').toString().trim(),
+  stock: getField(payload, ['stock', 'cantidad', 'existencia', 'inventario']),
+  categoria: (getField(payload, ['categoria', 'category', 'tipo']) ?? '').toString().trim(),
 });
+
+
+const getRequestPayload = (req = {}) => req.body?.producto ?? req.body?.product ?? req.body?.data ?? req.body ?? {};
 
 const validateProductPayload = (payload = {}) => {
   if (!payload || typeof payload !== 'object') return 'El cuerpo de la solicitud es inválido.';
@@ -46,7 +67,7 @@ const obtenerProductoPorId = async (req, res) => {
 };
 const crearProducto = async (req, res) => {
   try {
-      const payload = req.body?.producto ?? req.body ?? {};
+    const payload = getRequestPayload(req);
     const validated = validateProductPayload(payload);
     if (typeof validated === 'string') return res.status(400).json({ error: validated });
 
@@ -88,7 +109,7 @@ const crearProducto = async (req, res) => {
 const actualizarProducto = async (req, res) => {
   try {
     const { id } = req.params;
-     const payload = req.body?.producto ?? req.body ?? {};
+        const payload = getRequestPayload(req);
     const validated = validateProductPayload(payload);
     if (typeof validated === 'string') return res.status(400).json({ error: validated });
 

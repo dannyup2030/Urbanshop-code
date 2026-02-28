@@ -13,9 +13,12 @@ const read = (key, fallback) => {
 const write = (key, value) => localStorage.setItem(key, JSON.stringify(value));
 
 const apiRequest = async (path, options = {}) => {
+  const { headers: customHeaders = {}, ...restOptions } = options;
+
+  
   const response = await fetch(`${API_BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
-    ...options,
+    ...restOptions,
+    headers: { 'Content-Type': 'application/json', ...customHeaders },
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || 'Error de conexión con el servidor');
